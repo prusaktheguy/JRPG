@@ -1,77 +1,112 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System.Collections.Generic;
 
 namespace JRPG
 {
     /// <summary>
     /// This is the main type for your game.
     /// </summary>
-    public class Game1 : Game
+    public class MainGame : Game
     {
-        GraphicsDeviceManager graphics;
-        SpriteBatch spriteBatch;
+        private static MainGame instance;
+        public static MainGame Instance
+        {
+            get
+            {
+                if (instance == null)
+                {
+                    instance = new MainGame();
+                }
+                return instance;
+            }
+        }
 
-        public Game1()
+        private GraphicsDeviceManager graphics;
+        private SpriteBatch spriteBatch;
+
+        private GamescreenManager gamescreenManager;
+        public GamescreenManager GamescreenManager
+        {
+            get
+            {
+                return gamescreenManager;
+            }
+        }
+
+        private InputManager inputManager;
+        public InputManager InputManager
+        {
+            get
+            {
+                return inputManager;
+            }
+        }
+
+        private ContentManager contentManager;
+        public ContentManager ContentManager
+        {
+            get
+            {
+                return contentManager;
+            }
+        }
+
+        private SoundManager soundManager;
+        public SoundManager SoundManager
+        {
+            get
+            {
+                return soundManager;
+            }
+        }
+
+        public MainGame()
         {
             graphics = new GraphicsDeviceManager(this);
-            Content.RootDirectory = "Content";
+            IsMouseVisible = true;
+            inputManager = new InputManager();
+            gamescreenManager = new GamescreenManager();
+            contentManager = new ContentManager();
+            soundManager = new SoundManager(new List<SoundFX> {
+                new SoundFX {
+                    Key = "Coin", Filename = "Content/SFX/coin.wav", DefaultPitch = 1, DefaultVolume = 0.10f
+                }
+            });
         }
 
-        /// <summary>
-        /// Allows the game to perform any initialization it needs to before starting to run.
-        /// This is where it can query for any required services and load any non-graphic
-        /// related content.  Calling base.Initialize will enumerate through any components
-        /// and initialize them as well.
-        /// </summary>
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
-
             base.Initialize();
+
+            gamescreenManager.Push(new StartupGamescreen());
         }
 
-        /// <summary>
-        /// LoadContent will be called once per game and is the place to load
-        /// all of your content.
-        /// </summary>
         protected override void LoadContent()
         {
-            // Create a new SpriteBatch, which can be used to draw textures.
+            contentManager.Prepare(GraphicsDevice);
             spriteBatch = new SpriteBatch(GraphicsDevice);
-
-            // TODO: use this.Content to load your game content here
+            soundManager.LoadContent(contentManager);
         }
 
-        /// <summary>
-        /// UnloadContent will be called once per game and is the place to unload
-        /// game-specific content.
-        /// </summary>
         protected override void UnloadContent()
         {
-            // TODO: Unload any non ContentManager content here
         }
 
-        /// <summary>
-        /// Allows the game to run logic such as updating the world,
-        /// checking for collisions, gathering input, and playing audio.
-        /// </summary>
-        /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            // TODO: Add your update logic here
+            inputManager.Update(gameTime);
+
+            gamescreenManager.Update(gameTime);
 
             base.Update(gameTime);
         }
 
-        /// <summary>
-        /// This is called when the game should draw itself.
-        /// </summary>
-        /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            // TODO: Add your drawing code here
+            gamescreenManager.Draw(spriteBatch);
 
             base.Draw(gameTime);
         }
